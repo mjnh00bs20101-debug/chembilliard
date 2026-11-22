@@ -1,13 +1,11 @@
 {
-  "version": "2.0.0",
-  "versionCode": 20,
+  "version": "2.1.0",
+  "versionCode": 21,
   "releasedAt": "2026-11-22",
-  "title": "v2.0.0 — Đấu Trường Chung Kết 3D Pro, Shop Gậy 3D, Giải Đấu $960K & Quay Trailer 9:16 / 16:9",
+  "title": "v2.1.0 — Tối Ưu Phím Tắt Windows / PC, Hub Cập Nhật Tự Động & Trailer 9:16",
   "highlights": [
-    "Đấu Trường Chung Kết Quốc Tế 4 mặt khán đài 7 tầng, bảng LED chạy chữ, tường nhà tài trợ, khu cơ thủ & giá để gậy 3D",
-    "Hệ thống Côn Băng / Cò Tay thực tế, vật lý 360Hz, tự động đổi Gậy Phá & Gậy Đánh, 14 Cơ Pro + 4 Gậy Phá + 4 Lơ Cao Cấp",
-    "6 Boss AI BO5 (thưởng cược x2), Giải Đấu 5 Cấp Độ (4/8/16 cơ thủ, Vòng Tròn & Loại Trực Tiếp tới $960,000), Leo Rank ELO & Nhiệm Vụ Ngày",
-    "Quay Trailer Điện Ảnh 16:9 & TikTok 9:16 (30FPS MP4 H.264 chống giật, chỉ giữ tiếng bi & SFX gốc để tự ghép nhạc)",
-    "Hub Cập Nhật Phiên Bản Tự Động (giữ nguyên 100% tiền thưởng, gậy đã mua & điểm ELO khi nâng cấp bản mới)"
+    "Bộ phím tắt tối ưu cho Windows/PC: A/D hoặc ←/→ ngắm mượt (Shift ngắm siêu mịn Sniper, Scroll lăn chuột ngắm mịn), giữ Space kéo lực & thả để đánh (Esc hủy)",
+    "Phím nhanh cơ thủ Pro: 1/2/3/V/Tab chuyển góc máy, E mở bảng Áp-phê, Q reset tâm bi, B đổi Gậy Phá/Đánh, K chấm lơ, T gia hạn +15s, H xem bảng phím tắt",
+    "Đấu Trường Chung Kết 4 mặt khán đài 7 tầng, Côn Băng / Cò Tay 360Hz, Shop 14 Cơ 3D, 6 Boss AI BO5, Giải Đấu $960K & Quay Trailer 9:16 / 16:9"
   ]
 }

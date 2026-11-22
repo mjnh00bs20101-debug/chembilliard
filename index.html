@@ -217,9 +217,13 @@
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/></svg>
                     <span class="hidden sm:inline">Menu</span>
                 </button>
-                <button id="btn-sound" class="glass-btn rounded-xl p-2 text-slate-100" title="Âm thanh">
+                <button id="btn-sound" class="glass-btn rounded-xl p-2 text-slate-100" title="Âm thanh (M)">
                     <svg id="icon-sound-on" class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5L6 9H2v6h4l5 4V5zM15.54 8.46a5 5 0 010 7.07M19.07 4.93a10 10 0 010 14.14"/></svg>
                     <svg id="icon-sound-off" class="w-4 h-4 hidden text-rose-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5L6 9H2v6h4l5 4V5zM23 9l-6 6M17 9l6 6"/></svg>
+                </button>
+                <button id="btn-pc-shortcuts" onclick="togglePcShortcutsModal()" class="hidden sm:flex glass-btn rounded-xl px-2.5 py-2 text-xs font-bold text-sky-300 items-center gap-1 border border-sky-400/30" title="Bảng phím tắt Windows / PC (H)">
+                    <span>⌨️</span>
+                    <span>Phím (H)</span>
                 </button>
                 <div id="hud-room-badge" class="hidden glass-panel rounded-xl px-2.5 py-1.5 text-[11px] font-bold text-amber-300 tracking-wider cursor-pointer" title="Chạm để sao chép mã phòng">
                     Phòng: <span id="hud-room-code">----</span>
@@ -1032,12 +1036,11 @@
                 </button>
             </div>
 
-            <!-- Mobile Controls Tip -->
+            <!-- PC & Mobile Controls Tip -->
             <div class="text-[11px] text-slate-400 bg-slate-900/60 rounded-xl px-3 py-2 border border-white/5 flex flex-wrap items-center justify-center gap-x-4 gap-y-1">
-                <span>👆 Vuốt màn hình: Xoay cơ</span>
-                <span>🎚️ Thanh dưới: Ngắm siêu mịn</span>
-                <span>🎱 Kéo thanh phải: Đánh cơ</span>
-                <span>⚪ Nút bi trắng: Áp-phê & Nhảy bi</span>
+                <span>⌨️ PC: <b>A/D</b> hoặc <b>←/→</b> ngắm (<b>Shift</b> siêu mịn)</span>
+                <span>🚀 Giữ <b>Space</b> kéo lực &amp; thả để đánh (<b>Esc</b> hủy)</span>
+                <span>📷 <b>1/2/3/V</b> góc máy • <b>E</b> áp-phê • <b>B</b> đổi gậy phá • <b>K</b> chấm lơ • <b>H</b> xem phím</span>
             </div>
         </div>
     </div>
@@ -1151,6 +1154,46 @@
                             <tbody id="verFeatureTableBody" class="divide-y divide-white/5 text-slate-200"></tbody>
                         </table>
                     </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== WINDOWS / PC KEYBOARD SHORTCUTS MODAL (H) ==================== -->
+    <div id="pc-shortcuts-modal" onclick="togglePcShortcutsModal(false)" class="hidden fixed inset-0 bg-slate-950/80 backdrop-blur-md z-[82] flex items-center justify-center p-3 sm:p-4">
+        <div onclick="event.stopPropagation()" class="glass-panel rounded-3xl w-full max-w-2xl max-h-[86vh] flex flex-col overflow-hidden border border-sky-400/40 shadow-[0_0_50px_rgba(56,189,248,0.25)]">
+            <div class="flex items-center justify-between px-4 py-3.5 border-b border-white/10">
+                <div class="flex items-center gap-2.5">
+                    <div class="w-9 h-9 rounded-xl bg-sky-500/20 border border-sky-400/40 text-sky-300 flex items-center justify-center text-base font-black">⌨️</div>
+                    <div>
+                        <div class="font-extrabold text-sm text-white">Phím Tắt Tối Ưu Cho Windows / PC</div>
+                        <div class="text-[11px] text-slate-400">Ngắm chuẩn từng milimet, kéo lực bằng Space &amp; thao tác nhanh như cơ thủ Pro</div>
+                    </div>
+                </div>
+                <button onclick="togglePcShortcutsModal(false)" class="w-8 h-8 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white text-sm font-bold">✕</button>
+            </div>
+            <div class="p-4 overflow-y-auto grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+                <div class="p-3 rounded-2xl bg-slate-900/75 border border-white/10 space-y-2">
+                    <div class="font-black text-sky-300 text-[11px] uppercase tracking-wider">🎯 Ngắm &amp; Đánh Cơ</div>
+                    <div class="flex justify-between gap-2"><span class="text-slate-300">Xoay cơ trái / phải</span><kbd class="px-1.5 py-0.5 rounded bg-slate-800 border border-white/15 font-mono text-white">A / D</kbd> <kbd class="px-1.5 py-0.5 rounded bg-slate-800 border border-white/15 font-mono text-white">← / →</kbd></div>
+                    <div class="flex justify-between gap-2"><span class="text-slate-300">Ngắm siêu mịn (Sniper)</span><kbd class="px-1.5 py-0.5 rounded bg-slate-800 border border-sky-400/40 font-mono text-sky-300">Shift + A/D</kbd></div>
+                    <div class="flex justify-between gap-2"><span class="text-slate-300">Ngắm nhanh x2.5</span><kbd class="px-1.5 py-0.5 rounded bg-slate-800 border border-white/15 font-mono text-white">Ctrl + A/D</kbd></div>
+                    <div class="flex justify-between gap-2"><span class="text-slate-300">Lăn chuột ngắm mịn</span><kbd class="px-1.5 py-0.5 rounded bg-slate-800 border border-white/15 font-mono text-white">Scroll</kbd></div>
+                    <div class="flex justify-between gap-2"><span class="text-slate-300">Giữ kéo lực • Thả đánh</span><kbd class="px-2 py-0.5 rounded bg-emerald-500/20 border border-emerald-400/50 font-mono text-emerald-300 font-bold">Space</kbd></div>
+                    <div class="flex justify-between gap-2"><span class="text-slate-300">Hủy lực khi đang giữ Space</span><kbd class="px-1.5 py-0.5 rounded bg-rose-500/20 border border-rose-400/40 font-mono text-rose-300">Esc</kbd></div>
+                </div>
+                <div class="p-3 rounded-2xl bg-slate-900/75 border border-white/10 space-y-2">
+                    <div class="font-black text-amber-300 text-[11px] uppercase tracking-wider">📷 Góc Máy &amp; Kỹ Thuật</div>
+                    <div class="flex justify-between gap-2"><span class="text-slate-300">Góc Cơ Thủ / Toàn Bàn / 3D</span><kbd class="px-1.5 py-0.5 rounded bg-slate-800 border border-white/15 font-mono text-white">1 / 2 / 3</kbd></div>
+                    <div class="flex justify-between gap-2"><span class="text-slate-300">Soi nhanh Toàn Bàn (Top)</span><kbd class="px-1.5 py-0.5 rounded bg-slate-800 border border-white/15 font-mono text-white">V</kbd> / <kbd class="px-1.5 py-0.5 rounded bg-slate-800 border border-white/15 font-mono text-white">Tab</kbd></div>
+                    <div class="flex justify-between gap-2"><span class="text-slate-300">Mở bảng Áp-phê / Reset tâm</span><kbd class="px-1.5 py-0.5 rounded bg-slate-800 border border-white/15 font-mono text-white">E</kbd> / <kbd class="px-1.5 py-0.5 rounded bg-slate-800 border border-white/15 font-mono text-white">Q</kbd></div>
+                    <div class="flex justify-between gap-2"><span class="text-slate-300">Đổi Gậy Phá ↔ Gậy Đánh</span><kbd class="px-1.5 py-0.5 rounded bg-slate-800 border border-amber-400/40 font-mono text-amber-300">B</kbd></div>
+                    <div class="flex justify-between gap-2"><span class="text-slate-300">Chấm lơ / Gia hạn +15s</span><kbd class="px-1.5 py-0.5 rounded bg-slate-800 border border-white/15 font-mono text-white">K</kbd> / <kbd class="px-1.5 py-0.5 rounded bg-slate-800 border border-white/15 font-mono text-white">T</kbd></div>
+                    <div class="flex justify-between gap-2"><span class="text-slate-300">Tia ngắm / Âm thanh / Phím</span><kbd class="px-1.5 py-0.5 rounded bg-slate-800 border border-white/15 font-mono text-white">L / M / H</kbd></div>
+                </div>
+                <div class="sm:col-span-2 p-2.5 rounded-xl bg-sky-500/10 border border-sky-400/30 text-[11px] text-sky-200 flex flex-wrap items-center justify-between gap-2">
+                    <span>🎱 <b>Đặt Bi Trong Tay:</b> Dùng <b>W A S D</b> hoặc phím mũi tên để di chuyển bi cái, bấm <b>Enter / Space</b> để xác nhận đặt bi.</span>
+                    <span>🏋️ <b>Luyện tập:</b> <b>F</b> xếp lại bàn • <b>G</b> cầm bi trong tay.</span>
                 </div>
             </div>
         </div>
@@ -5896,9 +5939,14 @@
             canvas.addEventListener('mousedown', e => onPointerDown(e.clientX, e.clientY));
             window.addEventListener('mousemove', e => onPointerMove(e.clientX, e.clientY));
             window.addEventListener('mouseup', onPointerUp);
+            canvas.addEventListener('contextmenu', e => e.preventDefault());
             canvas.addEventListener('wheel', e => {
+                if (state.screen !== 'game') return;
                 if (state.camMode === 'orbit' || (state.phase === 'replaying' && state.replayCam === 'orbit')) {
                     state.orbitDist = Math.max(1.15, Math.min(3.8, state.orbitDist + e.deltaY * 0.0018));
+                } else if (state.phase === 'aiming' && canLocalPlayerAct()) {
+                    const step = e.shiftKey ? 0.0007 : 0.0024;
+                    state.aimAngle += (e.deltaY > 0 ? 1 : -1) * step;
                 }
             }, { passive: true });
 
@@ -8631,27 +8679,270 @@
                 return;
             }
 
+            stepKeyboardControls(dt);
             updateAimAndCue(dt);
             updateCamera(dt);
             renderer.render(scene, camera);
         }
 
         // =========================================================================
+        // 15B. WINDOWS / PC OPTIMIZED KEYBOARD CONTROLS (60FPS AIM + SPACE POWER)
+        // =========================================================================
+        const pcKeys = Object.create(null);
+        let kbCharging = false;
+        let kbChargeDir = 1;
+        let kbPowerPct = 0;
+        let kbLastTickBucket = 0;
+
+        function togglePcShortcutsModal(force) {
+            const el = document.getElementById('pc-shortcuts-modal');
+            if (!el) return;
+            if (typeof force === 'boolean') el.classList.toggle('hidden', !force);
+            else el.classList.toggle('hidden');
+        }
+
+        function setKbPowerVisual(pct) {
+            const powerRail = document.getElementById('power-rail');
+            const powerHandle = document.getElementById('power-handle');
+            const powerFill = document.getElementById('power-fill');
+            const powerBadge = document.getElementById('power-pct-badge');
+            const powerSpeedBadge = document.getElementById('power-speed-badge');
+            const powerFeelLabel = document.getElementById('power-feel-label');
+            if (!powerRail || !powerHandle || !powerFill || !powerBadge) return;
+
+            const clamped = Math.max(0, Math.min(state.obstructionPowerCap || 1, pct));
+            state.cuePullVisual = clamped;
+            powerHandle.classList.remove('snap-release');
+            powerHandle.style.top = (16 + clamped * 44) + '%';
+            powerFill.style.height = (clamped * 84) + '%';
+
+            const pInt = Math.round(clamped * 100);
+            const kmh = (powerToRealSpeed(clamped, state.cueMode) * 3.6).toFixed(1);
+            powerBadge.textContent = pInt + '%';
+            if (powerSpeedBadge) powerSpeedBadge.textContent = kmh + ' km/h';
+            powerRail.classList.toggle('charging', pInt >= 5 && pInt < 85);
+            powerRail.classList.toggle('max-charge', pInt >= 85);
+
+            const bucket = Math.floor(pInt / 10);
+            if (bucket !== kbLastTickBucket && bucket > 0) {
+                kbLastTickBucket = bucket;
+                sound.playPowerTick(clamped);
+            }
+            if (powerFeelLabel) {
+                if (pInt === 0) powerFeelLabel.textContent = 'Kéo đánh';
+                else if (pInt < 25) powerFeelLabel.textContent = 'Chạm nhẹ (Space)';
+                else if (pInt < 55) powerFeelLabel.textContent = 'Lực vừa (Space)';
+                else if (pInt < 85) powerFeelLabel.textContent = 'Đánh mạnh (Space)';
+                else powerFeelLabel.textContent = 'TỐI ĐA (Esc hủy)';
+            }
+        }
+
+        function cancelKbCharge() {
+            if (!kbCharging && kbPowerPct === 0) return;
+            kbCharging = false;
+            kbPowerPct = 0;
+            kbChargeDir = 1;
+            kbLastTickBucket = 0;
+            setKbPowerVisual(0);
+        }
+
+        function stepKeyboardControls(dt) {
+            if (state.screen !== 'game') return;
+
+            // Ball-in-Hand precision keyboard placement (WASD / Arrow keys)
+            if (state.phase === 'ballInHand' && canLocalPlayerAct()) {
+                const moveSpd = pcKeys.Shift ? 0.25 : 0.85;
+                let mx = 0, mz = 0;
+                if (pcKeys.KeyA || pcKeys.ArrowLeft) mx -= 1;
+                if (pcKeys.KeyD || pcKeys.ArrowRight) mx += 1;
+                if (pcKeys.KeyW || pcKeys.ArrowUp) mz -= 1;
+                if (pcKeys.KeyS || pcKeys.ArrowDown) mz += 1;
+                if (mx !== 0 || mz !== 0) {
+                    const cue = balls[0];
+                    cue.x = Math.max(-HALF_W + BALL_R + 0.004, Math.min(HALF_W - BALL_R - 0.004, cue.x + mx * moveSpd * dt));
+                    cue.z = Math.max(-HALF_D + BALL_R + 0.004, Math.min(HALF_D - BALL_R - 0.004, cue.z + mz * moveSpd * dt));
+                    cue.mesh.position.set(cue.x, BALL_R, cue.z);
+                    cue.shadowMesh.position.set(cue.x, 0.0008, cue.z);
+                }
+                return;
+            }
+
+            // Orbit camera smooth keyboard navigation
+            if (state.camMode === 'orbit') {
+                const rotSpd = pcKeys.Shift ? 0.55 : 1.45;
+                if (pcKeys.KeyA || pcKeys.ArrowLeft) state.orbitYaw -= rotSpd * dt;
+                if (pcKeys.KeyD || pcKeys.ArrowRight) state.orbitYaw += rotSpd * dt;
+                if (pcKeys.KeyW || pcKeys.ArrowUp) state.orbitDist = Math.max(1.15, state.orbitDist - 1.4 * dt);
+                if (pcKeys.KeyS || pcKeys.ArrowDown) state.orbitDist = Math.min(3.8, state.orbitDist + 1.4 * dt);
+            } else if (state.phase === 'aiming' && canLocalPlayerAct()) {
+                // Smooth 60FPS Aiming: A/D or Left/Right (Shift = Sniper 6x fine aim, Ctrl = Fast 2.5x)
+                let aimDir = 0;
+                if (pcKeys.KeyA || pcKeys.ArrowLeft) aimDir -= 1;
+                if (pcKeys.KeyD || pcKeys.ArrowRight) aimDir += 1;
+                if (aimDir !== 0) {
+                    const spd = pcKeys.Shift ? 0.14 : (pcKeys.Control ? 2.15 : 0.85);
+                    state.aimAngle += aimDir * spd * dt;
+                }
+            }
+
+            // Spacebar smooth power charge (oscillates cleanly between 8% and max cap so you can time exact power!)
+            if (kbCharging && state.phase === 'aiming' && canLocalPlayerAct()) {
+                const maxCap = state.obstructionPowerCap || 1;
+                const chargeRate = pcKeys.Shift ? 0.42 : 0.88;
+                kbPowerPct += kbChargeDir * chargeRate * dt;
+                if (kbPowerPct >= maxCap) {
+                    kbPowerPct = maxCap;
+                    kbChargeDir = -1;
+                } else if (kbPowerPct <= 0.06 && kbChargeDir < 0) {
+                    kbPowerPct = 0.06;
+                    kbChargeDir = 1;
+                }
+                setKbPowerVisual(kbPowerPct);
+            } else if (kbCharging) {
+                cancelKbCharge();
+            }
+        }
+
+        function initPcKeyboardShortcuts() {
+            const isTypingTarget = (el) => {
+                if (!el) return false;
+                const tag = (el.tagName || '').toUpperCase();
+                return tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT' || el.isContentEditable;
+            };
+
+            const setCamDirect = (mode) => {
+                state.camMode = mode;
+                document.querySelectorAll('.cam-opt-btn').forEach(b => b.classList.toggle('active', b.dataset.cam === mode));
+                updateHUD();
+            };
+
+            window.addEventListener('keydown', (e) => {
+                if (isTypingTarget(e.target)) return;
+                if (e.key === 'Shift') pcKeys.Shift = true;
+                if (e.key === 'Control') pcKeys.Control = true;
+                pcKeys[e.code] = true;
+
+                // Global Esc: cancel Spacebar charge or close any open modal
+                if (e.code === 'Escape') {
+                    if (kbCharging) {
+                        cancelKbCharge();
+                        showToast('✖️ Đã hủy kéo lực (Esc)', 'info');
+                        return;
+                    }
+                    ['pc-shortcuts-modal', 'version-update-modal', 'spin-modal', 'chat-modal', 'shop-modal', 'profile-modal', 'pause-modal', 'trailer-export-modal'].forEach(id => {
+                        document.getElementById(id)?.classList.add('hidden');
+                    });
+                    return;
+                }
+
+                // H or F1 toggles PC Shortcuts Cheatsheet
+                if (e.code === 'KeyH' || e.code === 'F1') {
+                    e.preventDefault();
+                    togglePcShortcutsModal();
+                    return;
+                }
+
+                if (state.screen !== 'game' || (trailerState && trailerState.active)) return;
+
+                // Prevent browser scrolling on game keys
+                if (['Space', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Tab'].includes(e.code)) {
+                    e.preventDefault();
+                }
+
+                if (e.repeat) return;
+
+                // Ball-in-hand confirm with Enter or Space
+                if (state.phase === 'ballInHand' && canLocalPlayerAct() && (e.code === 'Enter' || e.code === 'Space')) {
+                    confirmBallInHand();
+                    return;
+                }
+
+                // Spacebar start charging power
+                if (e.code === 'Space' && state.phase === 'aiming' && canLocalPlayerAct()) {
+                    sound.init();
+                    kbCharging = true;
+                    kbChargeDir = 1;
+                    kbPowerPct = 0.05;
+                    kbLastTickBucket = 0;
+                    setKbPowerVisual(kbPowerPct);
+                    return;
+                }
+
+                // Camera quick switches: 1 = Aim, 2/V/Tab = Top-Down Peek, 3 = Orbit, C = Cycle
+                if (e.code === 'Digit1') { setCamDirect('low'); showToast('📷 Góc Cơ Thủ (1)', 'info'); }
+                else if (e.code === 'Digit2') { setCamDirect('top'); showToast('👁️ Góc Toàn Bàn (2)', 'info'); }
+                else if (e.code === 'Digit3') { setCamDirect('orbit'); showToast('🔄 Góc Tự Do 3D (3)', 'info'); }
+                else if (e.code === 'KeyV' || e.code === 'Tab') {
+                    setCamDirect(state.camMode === 'top' ? 'low' : 'top');
+                }
+                else if (e.code === 'KeyC') { document.getElementById('btn-cam-mode')?.click(); }
+                else if (e.code === 'KeyE') { document.getElementById('spin-modal')?.classList.toggle('hidden'); }
+                else if (e.code === 'KeyQ') {
+                    state.spinX = 0; state.spinY = 0; state.elevation = 0;
+                    if (typeof updateSpinUI === 'function') updateSpinUI();
+                    showToast('⚪ Đã reset áp-phê về tâm bi (Q)', 'info');
+                }
+                else if (e.code === 'KeyB') { document.getElementById('btn-cue-mode')?.click(); }
+                else if (e.code === 'KeyK') { document.getElementById('btn-chalk-cue')?.click(); }
+                else if (e.code === 'KeyT') { document.getElementById('btn-extension')?.click(); }
+                else if (e.code === 'KeyL') { document.getElementById('btn-aim-toggle')?.click(); }
+                else if (e.code === 'KeyM') { document.getElementById('btn-sound')?.click(); }
+                else if (e.code === 'KeyF' && state.playType === 'practice') { document.getElementById('btn-practice-rerack')?.click(); }
+                else if (e.code === 'KeyG' && state.playType === 'practice') { document.getElementById('btn-practice-bih')?.click(); }
+            });
+
+            window.addEventListener('keyup', (e) => {
+                if (e.key === 'Shift') pcKeys.Shift = false;
+                if (e.key === 'Control') pcKeys.Control = false;
+                pcKeys[e.code] = false;
+
+                if (e.code === 'Space' && kbCharging) {
+                    const shootPwr = kbPowerPct;
+                    kbCharging = false;
+                    kbPowerPct = 0;
+                    kbChargeDir = 1;
+                    kbLastTickBucket = 0;
+                    setKbPowerVisual(0);
+                    if (shootPwr >= 0.04 && state.phase === 'aiming' && canLocalPlayerAct()) {
+                        triggerLocalShot(shootPwr);
+                    }
+                }
+            });
+
+            window.addEventListener('blur', () => {
+                Object.keys(pcKeys).forEach(k => { pcKeys[k] = false; });
+                cancelKbCharge();
+            });
+        }
+
+        // =========================================================================
         // 16. AUTO-UPDATE & VERSION CHANGELOG HUB (CHEMNOTE STYLE)
         // =========================================================================
         const APP_CURRENT_VERSION = {
-            version: '2.0.0',
-            versionCode: 20,
+            version: '2.1.0',
+            versionCode: 21,
             releasedAt: '2026-11-22',
-            title: 'ChemBilliard 3D Pro — Đấu Trường Chung Kết & Trailer 9:16'
+            title: 'ChemBilliard 3D Pro — Phím Tắt Windows/PC, Hub Cập Nhật & Trailer 9:16'
         };
 
         const VERSION_CHANGELOG_HISTORY = [
             {
+                version: 'v2.1.0',
+                title: 'Tối Ưu Phím Tắt Windows / PC (Ngắm Sniper, Kéo Lực Space & Phím Nhanh)',
+                date: '22/11/2026',
+                badge: 'Bản hiện tại',
+                items: [
+                    'Ngắm 60FPS bằng phím A/D hoặc ←/→ (giữ Shift để ngắm siêu mịn Sniper, giữ Ctrl xoay nhanh, lăn chuột Scroll ngắm mịn).',
+                    'Giữ phím Space kéo lực trực tiếp trên thanh lực + thả để đánh ngay (bấm Esc để hủy lực an toàn).',
+                    'Phím tắt Pro: 1/2/3/V/Tab đổi góc máy, E mở áp-phê, Q reset tâm bi, B đổi Gậy Phá/Thường, K chấm lơ, T gia hạn +15s, M âm thanh, H mở bảng phím tắt.',
+                    'Đặt Bi Trong Tay chuẩn PC bằng W A S D / phím mũi tên + Enter/Space xác nhận.'
+                ]
+            },
+            {
                 version: 'v2.0.0',
                 title: 'Đấu Trường Chung Kết 3D, Hub Cập Nhật Tự Động & Quay Trailer 9:16 / 16:9',
                 date: '22/11/2026',
-                badge: 'Bản hiện tại',
+                badge: 'Cập nhật lớn',
                 items: [
                     'Thêm Hub Cập Nhật Bản Mới & thông báo cập nhật tự động qua version.json (giữ nguyên 100% tiền $, gậy & ELO).',
                     'Nâng cấp trình quay Trailer điện ảnh 7 hồi (42 giây) tham quan toàn bộ khán đài, tường hãng, khu để gậy, bàn ghế cơ thủ, cú phá 9-Ball & giới thiệu tính năng.',
@@ -8921,6 +9212,7 @@
             initThreeScene();
             loadProfile();
             setupInputControls();
+            initPcKeyboardShortcuts();
             bindUIEvents();
             initFirebase();
             initAutoUpdateWatcher();
