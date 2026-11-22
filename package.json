@@ -10,7 +10,8 @@
     "start": "electron .",
     "dist:win": "electron-builder --win nsis portable --x64 --publish never",
     "dist:win:nsis": "electron-builder --win nsis --x64 --publish never",
-    "dist:win:portable": "electron-builder --win portable --x64 --publish never"
+    "dist:win:portable": "electron-builder --win portable --x64 --publish never",
+    "dist:mac": "electron-builder --mac dmg --arm64 --x64 --publish never"
   },
   "dependencies": {
     "electron-updater": "^6.3.9"
@@ -69,6 +70,21 @@
     },
     "portable": {
       "artifactName": "ChemBilliard-Portable-${version}-win-x64.${ext}"
+    },
+    "mac": {
+      "category": "public.app-category.games",
+      "icon": "icons/icon-512.png",
+      "identity": null,
+      "target": [
+        {
+          "target": "dmg",
+          "arch": [
+            "arm64",
+            "x64"
+          ]
+        }
+      ],
+      "artifactName": "ChemBilliard-${version}-mac-${arch}.${ext}"
     }
   }
 }
