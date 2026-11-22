@@ -4,6 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>ChemBilliard 3D Pro - Bi-a Giải Đấu & Online</title>
+    <meta name="theme-color" content="#050914">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="ChemBilliard">
+    <link rel="manifest" href="./manifest.json">
+    <link rel="icon" type="image/png" href="./icons/icon-192.png">
+    <link rel="apple-touch-icon" href="./icons/icon-192.png">
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Three.js r128 -->
@@ -776,8 +783,11 @@
                         </button>
                         <button id="btn-open-update-hub" onclick="openVersionUpdateHub()" class="relative glass-btn rounded-xl px-2.5 py-1 text-xs font-extrabold text-emerald-300 border border-emerald-400/40 active:scale-95 transition flex items-center gap-1" title="Kiểm tra &amp; cập nhật phiên bản mới ChemBilliard 3D">
                             <span>🔄</span>
-                            <span id="lobby-version-badge">v2.0.0</span>
+                            <span id="lobby-version-badge">v2.1.0</span>
                             <span id="version-update-dot" class="hidden absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-emerald-400 ring-2 ring-slate-950 animate-pulse"></span>
+                        </button>
+                        <button id="btn-install-app" onclick="installPwaOrOpenDownload()" class="px-2.5 py-1 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 text-slate-950 text-xs font-black shadow active:scale-95 transition" title="Cài App về máy (Windows .exe hoặc App PWA 1-chạm)">
+                            📲 Tải App
                         </button>
                         <div class="flex items-center gap-1.5 text-[11px] font-semibold">
                             <span id="online-status-dot" class="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span>
@@ -1126,6 +1136,33 @@
                     <div class="pt-2.5 border-t border-sky-500/20">
                         <div class="font-extrabold text-[12px] text-sky-300 mb-1.5">✨ Tóm tắt cập nhật mới nhất</div>
                         <ul id="verLatestSummaryList" class="space-y-1 list-disc pl-4 text-[11px] text-slate-200 leading-relaxed"></ul>
+                    </div>
+                </div>
+
+                <!-- THẺ TẢI BẢN WINDOWS DESKTOP (.EXE) & CÀI APP PWA -->
+                <div class="p-3.5 rounded-2xl border border-emerald-500/35 bg-emerald-500/10 space-y-2.5">
+                    <div class="flex items-start justify-between gap-2 flex-wrap">
+                        <div>
+                            <div class="font-extrabold text-[12.5px] text-emerald-300 flex items-center gap-1.5">
+                                <span>💻 Tải App ChemBilliard Windows (.EXE) &amp; Cài App 1-Chạm</span>
+                                <span class="px-1.5 py-0.5 rounded bg-emerald-400/20 text-emerald-300 text-[10px] font-bold">Chính thức</span>
+                            </div>
+                            <div class="text-[11px] text-slate-300 mt-0.5">Chạy cửa sổ riêng trên Windows 10/11 (64-bit), tích hợp tự động cập nhật &amp; phím tắt PC. Hoặc cài nhanh dạng App PWA siêu nhẹ trên cả Windows, Mac, iPhone &amp; Android.</div>
+                        </div>
+                        <div class="flex items-center gap-2 flex-wrap">
+                            <button id="btn-modal-pwa-install" onclick="installPwaApp()" class="px-3 py-1.5 rounded-xl bg-sky-400 hover:bg-sky-300 text-slate-950 font-black text-[11px] shadow-md transition">
+                                📲 Cài App PWA ngay
+                            </button>
+                            <a href="https://github.com/mjnh00bs20101-debug/chembilliard/releases/download/v2.1.0/ChemBilliard-Setup-2.1.0-win-x64.exe" target="_blank" rel="noopener noreferrer" class="px-3 py-1.5 rounded-xl bg-emerald-400 hover:bg-emerald-300 text-slate-950 font-black text-[11px] shadow-md transition">
+                                ⬇ Tải Setup (.exe)
+                            </a>
+                            <a href="https://github.com/mjnh00bs20101-debug/chembilliard/releases/download/v2.1.0/ChemBilliard-Portable-2.1.0-win-x64.exe" target="_blank" rel="noopener noreferrer" class="px-2.5 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-600 text-slate-200 font-bold text-[11px] transition">
+                                ⚡ Bản Portable
+                            </a>
+                            <a href="https://github.com/mjnh00bs20101-debug/chembilliard/releases/latest" target="_blank" rel="noopener noreferrer" class="px-2 py-1.5 rounded-xl bg-sky-500/15 hover:bg-sky-500/25 border border-sky-400/35 text-sky-300 font-bold text-[11px] transition">
+                                🔗 Releases
+                            </a>
+                        </div>
                     </div>
                 </div>
 
@@ -9202,8 +9239,54 @@
             window.location.replace(url.toString());
         }
 
+        let deferredPwaPrompt = null;
+
+        async function installPwaApp() {
+            if (deferredPwaPrompt) {
+                deferredPwaPrompt.prompt();
+                try {
+                    const choice = await deferredPwaPrompt.userChoice;
+                    if (choice && choice.outcome === 'accepted') {
+                        showToast('🎉 Đang cài đặt App ChemBilliard 3D về máy!', 'success');
+                    }
+                } catch (e) {}
+                deferredPwaPrompt = null;
+                return;
+            }
+            const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+            if (isIOS) {
+                showToast('📱 Trên iPhone/iPad: bấm nút Chia sẻ (□↑) → "Thêm vào Màn hình chính" để cài App!', 'info');
+            } else if (location.protocol === 'file:') {
+                showToast('💻 Hãy mở link web GitHub Pages trên Chrome/Edge để cài App PWA, hoặc tải bản Windows .exe bên cạnh!', 'info');
+            } else {
+                showToast('💻 Bấm biểu tượng Cài đặt (⊕) trên thanh địa chỉ Chrome/Edge để cài App ngay!', 'info');
+            }
+        }
+
+        function installPwaOrOpenDownload() {
+            if (deferredPwaPrompt) {
+                installPwaApp();
+            } else {
+                openVersionUpdateHub();
+            }
+        }
+
         function initAutoUpdateWatcher() {
             renderVersionUpdateHubContent();
+            if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost' || location.hostname === '127.0.0.1')) {
+                navigator.serviceWorker.register('./sw.js').catch(() => {});
+            }
+            window.addEventListener('beforeinstallprompt', (e) => {
+                e.preventDefault();
+                deferredPwaPrompt = e;
+            });
+            if (window.chembilliardDesktop && typeof window.chembilliardDesktop.onUpdateStatus === 'function') {
+                window.chembilliardDesktop.onUpdateStatus((st) => {
+                    if (st && st.status === 'downloaded') {
+                        showToast(`🆕 Đã tải xong bản mới v${st.version}! Đóng/mở lại hoặc bấm Cập nhật để cài.`, 'success');
+                    }
+                });
+            }
             setTimeout(() => checkForAppUpdate(true), 1800);
             window.addEventListener('online', () => checkForAppUpdate(true));
         }

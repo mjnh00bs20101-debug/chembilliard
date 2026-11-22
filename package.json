@@ -1,0 +1,74 @@
+{
+  "name": "chembilliard",
+  "productName": "ChemBilliard 3D Pro",
+  "version": "2.1.0",
+  "description": "ChemBilliard 3D Pro - Game Bi-a 3D chuyên nghiệp 360Hz trên Windows",
+  "author": "ChemBilliard",
+  "license": "Proprietary",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "dist:win": "electron-builder --win nsis portable --x64 --publish never",
+    "dist:win:nsis": "electron-builder --win nsis --x64 --publish never",
+    "dist:win:portable": "electron-builder --win portable --x64 --publish never"
+  },
+  "dependencies": {
+    "electron-updater": "^6.3.9"
+  },
+  "devDependencies": {
+    "electron": "^33.2.1",
+    "electron-builder": "^25.1.8"
+  },
+  "build": {
+    "appId": "vn.chembilliard.desktop",
+    "productName": "ChemBilliard 3D Pro",
+    "asar": true,
+    "publish": [
+      {
+        "provider": "github",
+        "owner": "mjnh00bs20101-debug",
+        "repo": "chembilliard"
+      }
+    ],
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "main.js",
+      "preload.js",
+      "index.html",
+      "version.json",
+      "manifest.json",
+      "icons/**/*"
+    ],
+    "win": {
+      "verifyUpdateCodeSignature": false,
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        },
+        {
+          "target": "portable",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "icon": "icons/icon.ico"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "ChemBilliard 3D Pro",
+      "artifactName": "ChemBilliard-Setup-${version}-win-x64.${ext}"
+    },
+    "portable": {
+      "artifactName": "ChemBilliard-Portable-${version}-win-x64.${ext}"
+    }
+  }
+}
