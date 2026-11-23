@@ -1,4 +1,4 @@
-const CACHE_NAME = 'chembilliard-v2.2.1';
+const CACHE_NAME = 'chembilliard-v2.2.2';
 const CORE_ASSETS = [
   './',
   './index.html',

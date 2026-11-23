@@ -1,8 +1,8 @@
 {
-  "version": "2.2.1",
-  "versionCode": 24,
+  "version": "2.2.2",
+  "versionCode": 25,
   "releasedAt": "2026-11-23",
-  "title": "v2.2.1 — Tùy Chỉnh Vị Trí Phá Bi Sau Vạch Đầu Bàn, Camera VP4 & Nỉ Đầm Tay",
+  "title": "v2.2.2 — Sửa Lỗi Nút Chỉnh Camera Trong Cài Đặt, Tùy Chỉnh Chỗ Phá Bi & Camera VP4",
   "highlights": [
     "Thêm nút ✋ Chỉnh chỗ phá bi (phím G) trước cú đề-pa: di chuyển bi cái tự do trong vùng sau vạch đầu bàn (phá giữa, phá 1 nút hay phá sát băng chuẩn 9-Ball) rồi tự căn hướng thẳng vào bi đầu",
     "Góc nhìn tùy chỉnh chuẩn Virtual Pool 4 (vuốt lên/xuống đổi độ cao mắt, chụm 2 ngón zoom gần/xa) & tăng độ nét Retina 1.75x–2.25x",

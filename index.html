@@ -549,8 +549,8 @@
     </div>
 
     <!-- ==================== IN-GAME PAUSE / SETTINGS MODAL ==================== -->
-    <div id="pause-modal" class="hidden fixed inset-0 z-50 bg-slate-950/75 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
-        <div class="glass-panel rounded-3xl p-5 w-full max-w-sm flex flex-col gap-3.5 my-auto">
+    <div id="pause-modal" class="hidden fixed inset-0 z-50 bg-slate-950/75 backdrop-blur-sm flex items-center justify-center p-3">
+        <div class="glass-panel rounded-3xl p-4 sm:p-5 w-full max-w-sm max-h-[92%] overflow-y-auto flex flex-col gap-3">
             <div class="flex items-center justify-between">
                 <h3 class="text-lg font-black text-white">Cài đặt trận đấu</h3>
                 <button id="btn-pause-close" class="glass-btn rounded-xl w-8 h-8 flex items-center justify-center text-slate-300">✕</button>
@@ -8078,20 +8078,30 @@
                 document.getElementById('icon-sound-off').classList.toggle('hidden', sound.enabled);
             });
 
-            // Camera Cycle Button
+            // Camera Mode Setter (clears quickTopPeek & shotCamUserOrbit so settings buttons ALWAYS apply immediately!)
+            const applyCameraMode = (mode, showFeedback = false) => {
+                state.camMode = mode;
+                state.quickTopPeek = false;
+                state.shotCamUserOrbit = false;
+                document.getElementById('btn-quick-peek')?.classList.remove('active');
+                if (mode === 'low') {
+                    state.aimCamPitch = 0.26;
+                    state.aimCamDist = 0.58;
+                }
+                document.querySelectorAll('.cam-opt-btn').forEach(b => b.classList.toggle('active', b.dataset.cam === state.camMode));
+                updateHUD();
+                if (showFeedback) {
+                    const labels = { low: 'Sát cơ (VP4)', orbit: 'Tự do 3D', top: 'Từ trên cao' };
+                    showToast('📷 Góc nhìn: ' + (labels[mode] || mode), 'info');
+                }
+            };
             const cycleCam = () => {
                 const order = ['low', 'orbit', 'top'];
-                state.camMode = order[(order.indexOf(state.camMode) + 1) % order.length];
-                updateHUD();
-                document.querySelectorAll('.cam-opt-btn').forEach(b => b.classList.toggle('active', b.dataset.cam === state.camMode));
+                applyCameraMode(order[(order.indexOf(state.camMode) + 1) % order.length], false);
             };
             document.getElementById('btn-cam-mode').addEventListener('click', cycleCam);
             document.querySelectorAll('.cam-opt-btn').forEach(btn => {
-                btn.addEventListener('click', () => {
-                    state.camMode = btn.dataset.cam;
-                    document.querySelectorAll('.cam-opt-btn').forEach(b => b.classList.toggle('active', b === btn));
-                    updateHUD();
-                });
+                btn.addEventListener('click', () => applyCameraMode(btn.dataset.cam, true));
             });
 
             // Aim Line Toggle
@@ -9007,6 +9017,9 @@
 
             const setCamDirect = (mode) => {
                 state.camMode = mode;
+                state.quickTopPeek = false;
+                state.shotCamUserOrbit = false;
+                document.getElementById('btn-quick-peek')?.classList.remove('active');
                 document.querySelectorAll('.cam-opt-btn').forEach(b => b.classList.toggle('active', b.dataset.cam === mode));
                 updateHUD();
             };
@@ -9117,10 +9130,10 @@
         // 16. AUTO-UPDATE & VERSION CHANGELOG HUB (CHEMNOTE STYLE)
         // =========================================================================
         const APP_CURRENT_VERSION = {
-            version: '2.2.1',
-            versionCode: 24,
+            version: '2.2.2',
+            versionCode: 25,
             releasedAt: '2026-11-23',
-            title: 'ChemBilliard 3D Pro — Tùy Chỉnh Chỗ Phá Bi, Camera VP4 & Nỉ Đầm Tay'
+            title: 'ChemBilliard 3D Pro — Fix Nút Chỉnh Cam Trong Cài Đặt & Tùy Chỉnh Chỗ Phá'
         };
 
         const VERSION_CHANGELOG_HISTORY = [
