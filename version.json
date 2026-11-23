@@ -1,11 +1,11 @@
 {
-  "version": "2.3.0",
-  "versionCode": 26,
+  "version": "2.4.0",
+  "versionCode": 27,
   "releasedAt": "2026-11-23",
-  "title": "v2.3.0 — Giao Diện Gọn Mắt Không Chồng Chữ & Ngắm Bi Siêu Chi Tiết (7× Mịn Hơn)",
+  "title": "v2.4.0 — Ghi & Xuất Video Highlight Đi Chấm Trọn Ván, HUD Gọn & Ngắm Siêu Chi Tiết",
   "highlights": [
-    "Tối ưu HUD siêu gọn chuẩn truyền hình: sửa dứt điểm lỗi chồng chữ 8 BI / TRƠN / SỌC / 24s, bi ăn gọn 1 hàng ngang, thu gọn thanh lực & nút bấm để bàn bi thoáng rộng tối đa",
-    "Ngắm bi siêu chi tiết với đường cong gia tốc thông minh: vuốt chậm mịn gấp 7 lần (căn lỗ từng milimet không bị trượt quá đà), vuốt nhanh vẫn xoay bàn mượt",
-    "Nâng cấp thanh Ngắm Siêu Mịn (±1.5°) kèm 2 nút nhích từng nấc ◀ / ▶ (±0.1° mỗi chạm, giữ để nhích đều)"
+    "Tự động lưu trọn chuỗi Highlight / Đi Chấm (kể cả cú ăn bi 8 / bi 9 kết thúc ván!), mở REC là phát ngay toàn bộ các cơ ăn bi & phá bi đẹp",
+    "Thêm nút 🎬 Xem & Xuất Video Highlight / Đi Chấm ngay trên màn hình Chiến Thắng và nút 💾 Xuất Video (MP4 720p 30FPS) trong trình phát lại để tải về khoe ngay",
+    "HUD siêu gọn hết chồng chữ & ngắm bi siêu chi tiết (mịn gấp 7 lần + 2 nút nhích ◀ / ▶ ±0.1°)"
   ]
 }

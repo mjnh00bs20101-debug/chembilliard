@@ -329,9 +329,10 @@
                     <span class="w-2.5 h-2.5 rounded-full bg-rose-500 animate-pulse"></span>
                     <span id="replay-title-text" class="text-[11px] font-black text-amber-300 uppercase tracking-wider">REPLAY • CƠ VỪA ĐÁNH</span>
                 </div>
-                <div class="flex items-center gap-1">
-                    <button id="btn-rep-mode-last" class="rep-mode-btn glass-btn active rounded-lg px-2 py-1 text-[10px] font-bold">Cơ gần nhất</button>
-                    <button id="btn-rep-mode-run" class="rep-mode-btn glass-btn rounded-lg px-2 py-1 text-[10px] font-bold text-amber-200">🔥 Chuỗi Đi Chấm</button>
+                <div class="flex items-center gap-1 flex-wrap">
+                    <button id="btn-rep-mode-run" class="rep-mode-btn glass-btn active rounded-lg px-2 py-1 text-[10px] font-bold text-amber-200">🔥 Chuỗi Highlight</button>
+                    <button id="btn-rep-mode-last" class="rep-mode-btn glass-btn rounded-lg px-2 py-1 text-[10px] font-bold">Cơ gần nhất</button>
+                    <button id="btn-rep-export-video" onclick="toggleExportReplayVideo()" class="rounded-lg bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-400 hover:to-teal-400 px-2.5 py-1 text-[10px] font-black text-slate-950 shadow transition">💾 Xuất Video</button>
                     <button id="btn-rep-exit" class="rounded-lg bg-rose-600/90 hover:bg-rose-500 px-2.5 py-1 text-[10px] font-extrabold text-white">✕ Thoát</button>
                 </div>
             </div>
@@ -655,6 +656,9 @@
                 </div>
             </div>
             <div class="flex flex-col gap-2 w-full mt-1">
+                <button id="btn-gameover-highlight" onclick="openGameOverHighlight()" class="w-full py-2.5 rounded-xl bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-400 hover:to-orange-400 font-black text-sm text-slate-950 shadow-lg active:scale-95 transition">
+                    🎬 Xem &amp; Xuất Video Highlight / Đi Chấm
+                </button>
                 <button id="btn-rematch" class="w-full py-3 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 font-extrabold text-sm text-white shadow-lg active:scale-95 transition">
                     🔄 Tái đấu ngay
                 </button>
@@ -5320,6 +5324,7 @@
 
                 state.winner = winner;
                 state.winReason = winReason;
+                saveCurrentShotToReplay();
                 state.phase = 'gameover';
                 if (state.playType === 'online') commitOnlineTurnState(foulMsg);
                 const rewardText = settleMatchRewards(winner);
@@ -5349,24 +5354,8 @@
                 showToast(`Đổi lượt: ${state.turn === 1 ? state.p1Name : state.p2Name}`, 'info');
             }
 
-            // Save shot into "Đi Chấm" (Run-Out) Multi-Shot Recorder
-            if (state.replayFrames.length >= 5) {
-                const meta = state.lastShotMeta || { aimAngle: state.aimAngle, cueMode: state.cueMode, speedKmh: 0, player: state.p1Name };
-                state.recordedShots.push({
-                    shotNum: state.recordedShots.length + 1,
-                    player: meta.player,
-                    cueMode: meta.cueMode,
-                    speedKmh: meta.speedKmh,
-                    aimAngle: meta.aimAngle,
-                    pocketedIds: [...state.pocketedThisShot],
-                    frames: state.replayFrames.slice()
-                });
-                if (state.recordedShots.length > 15) state.recordedShots.shift();
-                const repBtn = document.getElementById('btn-replay');
-                const repLbl = document.getElementById('replay-count-label');
-                if (repBtn) repBtn.disabled = false;
-                if (repLbl) repLbl.textContent = `REC (${state.recordedShots.length})`;
-            }
+            // Save shot into "Đi Chấm" / Highlight Multi-Shot Recorder
+            saveCurrentShotToReplay();
 
             // Automatically reset English/spin & elevation after every shot
             state.spinX = 0;
@@ -6444,12 +6433,42 @@
             updateStatsUI();
         }
 
+        let highlightExportState = null;
+
+        function saveCurrentShotToReplay() {
+            if (state.replayFrames.length < 5) return;
+            const meta = state.lastShotMeta || { aimAngle: state.aimAngle, cueMode: state.cueMode, speedKmh: 0, player: state.p1Name };
+            state.recordedShots.push({
+                shotNum: state.recordedShots.length + 1,
+                player: meta.player,
+                cueMode: meta.cueMode,
+                speedKmh: meta.speedKmh,
+                aimAngle: meta.aimAngle,
+                pocketedIds: [...state.pocketedThisShot],
+                isHighlight: state.pocketedThisShot.length > 0 || meta.cueMode === 'break',
+                frames: state.replayFrames.slice()
+            });
+            if (state.recordedShots.length > 20) state.recordedShots.shift();
+            const repBtn = document.getElementById('btn-replay');
+            const repLbl = document.getElementById('replay-count-label');
+            if (repBtn) repBtn.disabled = false;
+            if (repLbl) repLbl.textContent = `REC (${state.recordedShots.length})`;
+        }
+
+        function openGameOverHighlight() {
+            document.getElementById('gameover-modal')?.classList.add('hidden');
+            startReplay('runout');
+        }
+
         function buildReplayTimeline(mode) {
             state.replayMode = mode || state.replayMode;
             const shots = state.recordedShots;
             const out = [];
             if (state.replayMode === 'runout' && shots.length > 0) {
-                shots.forEach(s => {
+                // Prioritize highlight shots (break + all scoring/potting shots); fallback to all shots if none potted yet
+                const hlShots = shots.filter(s => s.isHighlight || (s.pocketedIds && s.pocketedIds.length > 0) || s.cueMode === 'break');
+                const useShots = hlShots.length > 0 ? hlShots : shots;
+                useShots.forEach(s => {
                     s.frames.forEach(fr => out.push({ fr, shot: s }));
                 });
             } else if (shots.length > 0) {
@@ -6464,23 +6483,104 @@
             document.getElementById('btn-rep-mode-last').classList.toggle('active', state.replayMode === 'last');
             document.getElementById('btn-rep-mode-run').classList.toggle('active', state.replayMode === 'runout');
             const runBtn = document.getElementById('btn-rep-mode-run');
-            if (runBtn) runBtn.textContent = `🔥 Chuỗi Đi Chấm (${shots.length} cơ)`;
+            const hlCount = shots.filter(s => s.isHighlight || (s.pocketedIds && s.pocketedIds.length > 0) || s.cueMode === 'break').length || shots.length;
+            if (runBtn) runBtn.textContent = `🔥 Highlight (${hlCount} cơ)`;
         }
 
-        function startReplay(mode = 'last') {
-            if ((state.replayFrames.length < 5 && state.recordedShots.length === 0) || state.phase === 'simulating') return;
+        function startReplay(mode = 'runout') {
+            if ((state.replayFrames.length < 5 && state.recordedShots.length === 0) || state.phase === 'simulating') {
+                showToast('Chưa có cú đánh Highlight nào để xem lại!', 'info');
+                return;
+            }
             buildReplayTimeline(mode);
             if (state.replayActiveFrames.length < 2) return;
             state.replayPaused = false;
             state.phase = 'replaying';
             document.getElementById('replay-controls-bar').classList.remove('hidden');
             document.getElementById('btn-rep-playpause').textContent = '⏸';
-            showToast(mode === 'runout' ? '🎬 Đang phát lại Chuỗi Đi Chấm!' : '🎬 Đang phát lại cú đánh (đổi góc máy ở thanh dưới)', 'info');
+            showToast(mode === 'runout' ? '🔥 Đang phát Chuỗi Highlight / Đi Chấm! Bấm 💾 Xuất Video để lưu về máy.' : '🎬 Đang phát lại cú đánh vừa rồi', 'info');
+        }
+
+        function stopHighlightExport() {
+            if (!highlightExportState || !highlightExportState.active) return;
+            highlightExportState.active = false;
+            try {
+                if (highlightExportState.recorder && highlightExportState.recorder.state !== 'inactive') {
+                    highlightExportState.recorder.stop();
+                }
+            } catch (e) {}
+            const expBtn = document.getElementById('btn-rep-export-video');
+            if (expBtn) expBtn.textContent = '💾 Xuất Video';
+        }
+
+        function toggleExportReplayVideo() {
+            if (highlightExportState && highlightExportState.active) {
+                stopHighlightExport();
+                return;
+            }
+            if (state.phase !== 'replaying' || state.replayActiveFrames.length < 2) {
+                showToast('Chưa có cảnh Highlight để xuất video!', 'error');
+                return;
+            }
+            const recCanvas = document.createElement('canvas');
+            recCanvas.width = 1280;
+            recCanvas.height = 720;
+            const recCtx = recCanvas.getContext('2d');
+            const mimeCandidates = [
+                'video/mp4;codecs=avc1.4d002a,mp4a.40.2',
+                'video/mp4;codecs=avc1.42E01E,mp4a.40.2',
+                'video/mp4',
+                'video/webm;codecs=h264',
+                'video/webm;codecs=vp8',
+                'video/webm'
+            ];
+            const mimeType = (typeof MediaRecorder !== 'undefined') ? (mimeCandidates.find(m => MediaRecorder.isTypeSupported(m)) || '') : '';
+            if (!mimeType || !recCanvas.captureStream) {
+                showToast('Trình duyệt không hỗ trợ xuất video trực tiếp! Hãy dùng Chrome/Safari/Edge mới.', 'error');
+                return;
+            }
+            const stream = recCanvas.captureStream(30);
+            const chunks = [];
+            const recorder = new MediaRecorder(stream, { mimeType, videoBitsPerSecond: 7500000 });
+            recorder.ondataavailable = e => { if (e.data && e.data.size > 0) chunks.push(e.data); };
+            recorder.onstop = () => {
+                const ext = mimeType.includes('mp4') ? 'mp4' : 'webm';
+                const fileName = `ChemBilliard_Highlight_DiCham.${ext}`;
+                const blob = new Blob(chunks, { type: mimeType });
+                if (lastTrailerBlobUrl) { try { URL.revokeObjectURL(lastTrailerBlobUrl); } catch (e) {} }
+                const url = URL.createObjectURL(blob);
+                lastTrailerBlobUrl = url;
+                const modal = document.getElementById('trailer-export-modal');
+                const vid = document.getElementById('trailer-preview-video');
+                const dlBtn = document.getElementById('btn-download-trailer');
+                const infoEl = document.getElementById('trailer-export-info');
+                const sizeMB = (blob.size / (1024 * 1024)).toFixed(1);
+                if (vid) vid.src = url;
+                if (dlBtn) { dlBtn.href = url; dlBtn.download = fileName; }
+                if (infoEl) infoEl.textContent = `🔥 ${fileName} • ${sizeMB} MB • Highlight Đi Chấm 1280×720 30FPS`;
+                if (modal) modal.classList.remove('hidden');
+                showToast(`🎬 Đã xuất xong video Highlight (${sizeMB} MB)! Bấm Tải Video Về Máy.`, 'success');
+            };
+
+            state.replayFloatIdx = 0;
+            state.replayPaused = false;
+            document.getElementById('btn-rep-playpause').textContent = '⏸';
+            const expBtn = document.getElementById('btn-rep-export-video');
+            if (expBtn) expBtn.textContent = '⏹ Đang ghi...';
+            recorder.start(500);
+            highlightExportState = { active: true, recCanvas, recCtx, recorder };
+            showToast('🎥 Đang quay lại toàn bộ Chuỗi Highlight từ đầu tới cuối...', 'info');
         }
 
         function stopReplay() {
+            stopHighlightExport();
             document.getElementById('replay-controls-bar').classList.add('hidden');
-            state.phase = 'aiming';
+            if (state.winner) {
+                state.phase = 'gameover';
+                document.getElementById('gameover-modal')?.classList.remove('hidden');
+            } else {
+                state.phase = 'aiming';
+            }
             syncBallMeshes();
             updateHUD();
         }
@@ -6523,6 +6623,12 @@
             if (!state.replayPaused) {
                 state.replayFloatIdx += state.replaySpeed;
                 if (state.replayFloatIdx >= total) {
+                    if (highlightExportState && highlightExportState.active) {
+                        applyReplayFrame(total - 1);
+                        stopHighlightExport();
+                        state.replayFloatIdx = 0;
+                        return;
+                    }
                     state.replayFloatIdx = 0; // Loop smoothly until user exits!
                 }
             }
@@ -8206,7 +8312,7 @@
             });
 
             // Replay & Multi-Angle "Đi Chấm" Controls
-            document.getElementById('btn-replay').addEventListener('click', () => startReplay('last'));
+            document.getElementById('btn-replay').addEventListener('click', () => startReplay(state.recordedShots.length > 1 ? 'runout' : 'last'));
             document.getElementById('btn-rep-exit').addEventListener('click', stopReplay);
             document.getElementById('btn-rep-mode-last').addEventListener('click', () => buildReplayTimeline('last'));
             document.getElementById('btn-rep-mode-run').addEventListener('click', () => buildReplayTimeline('runout'));
@@ -8899,6 +9005,30 @@
             updateAimAndCue(dt);
             updateCamera(dt);
             renderer.render(scene, camera);
+
+            // Composite frame into Highlight Video Exporter when recording a Đi Chấm replay!
+            if (highlightExportState && highlightExportState.active && state.phase === 'replaying') {
+                const rCtx = highlightExportState.recCtx;
+                const W = 1280, H = 720;
+                const src = renderer.domElement;
+                const srcAsp = src.width / Math.max(1, src.height);
+                const dstAsp = W / H;
+                let sx = 0, sy = 0, sw = src.width, sh = src.height;
+                if (srcAsp > dstAsp) { sw = src.height * dstAsp; sx = (src.width - sw) * 0.5; }
+                else { sh = src.width / dstAsp; sy = (src.height - sh) * 0.5; }
+                rCtx.drawImage(src, sx, sy, sw, sh, 0, 0, W, H);
+                rCtx.fillStyle = 'rgba(5, 10, 24, 0.72)';
+                rCtx.fillRect(24, 20, 520, 44);
+                rCtx.strokeStyle = 'rgba(250, 204, 21, 0.7)';
+                rCtx.lineWidth = 2;
+                rCtx.strokeRect(24, 20, 520, 44);
+                rCtx.fillStyle = '#fde047';
+                rCtx.font = '900 18px Inter, Arial, sans-serif';
+                rCtx.textAlign = 'left';
+                rCtx.textBaseline = 'middle';
+                const lbl = document.getElementById('replay-title-text')?.textContent || 'HIGHLIGHT ĐI CHẤM';
+                rCtx.fillText('🔥 CHEMBILLIARD 3D • ' + lbl, 38, 42);
+            }
         }
 
         // =========================================================================
@@ -9161,10 +9291,10 @@
         // 16. AUTO-UPDATE & VERSION CHANGELOG HUB (CHEMNOTE STYLE)
         // =========================================================================
         const APP_CURRENT_VERSION = {
-            version: '2.3.0',
-            versionCode: 26,
+            version: '2.4.0',
+            versionCode: 27,
             releasedAt: '2026-11-23',
-            title: 'ChemBilliard 3D Pro — HUD Gọn Đẹp Không Chồng Chữ & Ngắm Bi Siêu Chi Tiết'
+            title: 'ChemBilliard 3D Pro — Quay & Xuất Video Highlight Đi Chấm Trọn Ván'
         };
 
         const VERSION_CHANGELOG_HISTORY = [
