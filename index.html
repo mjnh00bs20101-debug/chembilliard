@@ -1247,7 +1247,7 @@
 
     <!-- Subtle Landscape Hint on Narrow Portrait Mobile -->
     <div id="portrait-hint" class="hidden fixed bottom-24 left-1/2 -translate-x-1/2 z-40 pointer-events-auto glass-panel rounded-full px-3.5 py-1.5 text-[11px] font-semibold text-sky-200 flex items-center gap-2 border-sky-400/40">
-        <span>📱 Xoay ngang màn hình để ngắm chuẩn hơn</span>
+        <span>📱 Tắt khóa xoay (🔒) rồi xoay ngang máy để ngắm chuẩn hơn</span>
         <button id="btn-close-portrait-hint" class="text-slate-400 hover:text-white font-bold">✕</button>
     </div>
 
@@ -3533,6 +3533,14 @@
             buildBalls();
 
             window.addEventListener('resize', onWindowResize);
+            window.addEventListener('orientationchange', () => {
+                onWindowResize();
+                setTimeout(onWindowResize, 150);
+                setTimeout(onWindowResize, 400);
+            });
+            if (window.visualViewport) {
+                window.visualViewport.addEventListener('resize', onWindowResize);
+            }
         }
 
         function buildPoolTable() {
