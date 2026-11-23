@@ -9389,10 +9389,8 @@
                     await Promise.all(keys.map(k => caches.delete(k)));
                 }
                 if (typeof navigator !== 'undefined' && navigator.serviceWorker) {
-                    const reg = await navigator.serviceWorker.getRegistration();
-                    if (reg) {
-                        try { await reg.update(); } catch (e) {}
-                    }
+                    const regs = await navigator.serviceWorker.getRegistrations();
+                    await Promise.all(regs.map(r => r.unregister().catch(() => {})));
                 }
             } catch (e) {}
             const url = new URL(window.location.href);
