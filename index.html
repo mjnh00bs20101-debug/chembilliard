@@ -38,9 +38,34 @@
         #game-container {
             position: fixed;
             inset: 0;
-            width: 100vw;
-            height: 100vh;
+            width: 100%;
+            height: 100%;
             z-index: 1;
+        }
+        /* Software-Forced Landscape Lock for Mobile / Broken Rotation Sensor */
+        html.force-landscape {
+            width: 100vw;
+            height: 100dvh;
+            overflow: hidden;
+            background-color: #050814;
+        }
+        html.force-landscape body {
+            position: fixed;
+            top: 0;
+            left: 100vw;
+            width: 100dvh;
+            height: 100vw;
+            transform: rotate(90deg);
+            transform-origin: top left;
+            overflow: hidden;
+        }
+        html.force-landscape #game-container,
+        html.force-landscape #hud-layer,
+        html.force-landscape #lobby-screen {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
         }
         #game-canvas {
             display: block;
@@ -3483,19 +3508,43 @@
                 if (state.gfxQuality === 'low') maxDpr = 1.0;
                 else if (state.gfxQuality === 'high') maxDpr = 1.75;
                 renderer.setPixelRatio(Math.min(dpr, maxDpr));
-                renderer.setSize(window.innerWidth, window.innerHeight);
+                const vp = getViewportSize();
+                renderer.setSize(vp.w, vp.h);
             }
             document.querySelectorAll('.gfx-opt-btn').forEach(btn => {
                 btn.classList.toggle('active', btn.dataset.gfx === state.gfxQuality);
             });
         }
 
+        function isForceLandscape() {
+            return document.documentElement.classList.contains('force-landscape');
+        }
+
+        function getViewportSize() {
+            if (isForceLandscape()) {
+                return { w: window.innerHeight, h: window.innerWidth };
+            }
+            return { w: window.innerWidth, h: window.innerHeight };
+        }
+
+        function applyAutoLandscapeLock() {
+            const isMobilePhone = /Mobi|Android|iPhone|iPod/i.test(navigator.userAgent)
+                || (navigator.maxTouchPoints > 1 && Math.min(window.innerWidth, window.innerHeight) < 650);
+            const needForce = isMobilePhone && (window.innerHeight > window.innerWidth);
+            document.documentElement.classList.toggle('force-landscape', needForce);
+            if (isMobilePhone && screen.orientation && typeof screen.orientation.lock === 'function') {
+                screen.orientation.lock('landscape').catch(() => {});
+            }
+        }
+
         function initThreeScene() {
+            applyAutoLandscapeLock();
             const canvas = document.getElementById('game-canvas');
             scene = new THREE.Scene();
             scene.background = new THREE.Color(0x050814);
 
-            camera = new THREE.PerspectiveCamera(42, window.innerWidth / window.innerHeight, 0.05, 95);
+            const vp = getViewportSize();
+            camera = new THREE.PerspectiveCamera(42, vp.w / vp.h, 0.05, 95);
             camera.position.set(0, 1.35, 2.2);
 
             renderer = new THREE.WebGLRenderer({
@@ -4196,17 +4245,20 @@
         }
 
         function onWindowResize() {
+            applyAutoLandscapeLock();
             if (!camera || !renderer) return;
-            camera.aspect = window.innerWidth / window.innerHeight;
+            const vp = getViewportSize();
+            camera.aspect = vp.w / vp.h;
             camera.updateProjectionMatrix();
-            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setSize(vp.w, vp.h);
             checkPortraitHint();
         }
 
         function checkPortraitHint() {
             const hint = document.getElementById('portrait-hint');
             if (!hint || hint.dataset.dismissed === '1') return;
-            const shouldShow = (state.screen === 'game' && window.innerHeight > window.innerWidth && window.innerWidth < 540);
+            const vp = getViewportSize();
+            const shouldShow = (!isForceLandscape() && state.screen === 'game' && vp.h > vp.w && vp.w < 540);
             hint.classList.toggle('hidden', !shouldShow);
         }
 
@@ -5866,7 +5918,8 @@
             } else if (state.phase === 'simulating') {
                 // Natural real-life ShootersPool post-shot standing view:
                 // Smoothly rises up behind the shot instead of jarring camera teleport!
-                const isPortrait = window.innerHeight > window.innerWidth;
+                const _vpCam = getViewportSize();
+                const isPortrait = _vpCam.h > _vpCam.w;
                 const standBack = isPortrait ? 1.55 : 1.28;
                 const standHeight = isPortrait ? 0.92 : 0.72;
                 const anchorX = cue.x * 0.35;
@@ -5883,7 +5936,8 @@
                 );
             } else {
                 // ShootersPool Signature Low-Angle Broadcast View + subtle power-charge anticipation pullback!
-                const isPortrait = window.innerHeight > window.innerWidth;
+                const _vpCam = getViewportSize();
+                const isPortrait = _vpCam.h > _vpCam.w;
                 const chargePull = (state.phase === 'aiming' ? state.cuePullVisual * 0.055 : 0);
                 const backDist = (isPortrait ? 0.90 : 0.70) + chargePull;
                 const camH = isPortrait ? 0.32 : 0.215;
@@ -5928,7 +5982,22 @@
             let lastX = 0, lastY = 0;
             let pinchStartDist = 0;
 
+            const toLogicalPoint = (clientX, clientY) => {
+                if (isForceLandscape()) {
+                    return { x: clientY, y: window.innerWidth - clientX };
+                }
+                return { x: clientX, y: clientY };
+            };
+
             const getCanvasCoords = (clientX, clientY) => {
+                if (isForceLandscape()) {
+                    const pt = toLogicalPoint(clientX, clientY);
+                    const vp = getViewportSize();
+                    return {
+                        nx: (pt.x / vp.w) * 2 - 1,
+                        ny: -(pt.y / vp.h) * 2 + 1
+                    };
+                }
                 const rect = canvas.getBoundingClientRect();
                 return {
                     nx: ((clientX - rect.left) / rect.width) * 2 - 1,
@@ -5953,17 +6022,19 @@
                 sound.init();
                 if (state.screen !== 'game') return;
                 isDragging = true;
-                lastX = x;
-                lastY = y;
+                const pt = toLogicalPoint(x, y);
+                lastX = pt.x;
+                lastY = pt.y;
                 if (state.phase === 'ballInHand') moveBallInHand(x, y);
             };
 
             const onPointerMove = (x, y) => {
                 if (!isDragging || state.screen !== 'game') return;
-                const dx = x - lastX;
-                const dy = y - lastY;
-                lastX = x;
-                lastY = y;
+                const pt = toLogicalPoint(x, y);
+                const dx = pt.x - lastX;
+                const dy = pt.y - lastY;
+                lastX = pt.x;
+                lastY = pt.y;
 
                 if (state.phase === 'ballInHand') {
                     moveBallInHand(x, y);
@@ -6059,9 +6130,11 @@
             let currentPullPct = 0;
             let lastPowerTickBucket = 0;
 
-            const updatePowerFromClientY = (clientY) => {
+            const updatePowerFromClientY = (clientY, clientX = 0) => {
                 const rect = powerRail.getBoundingClientRect();
-                const relY = (clientY - rect.top) / rect.height;
+                const relY = isForceLandscape()
+                    ? (rect.right - clientX) / Math.max(1, rect.width)
+                    : (clientY - rect.top) / Math.max(1, rect.height);
                 powerHandle.classList.remove('snap-release');
 
                 if (relY < 0.16) {
@@ -6150,11 +6223,11 @@
                 sound.init();
                 powerDragging = true;
                 powerRail.setPointerCapture(e.pointerId);
-                updatePowerFromClientY(e.clientY);
+                updatePowerFromClientY(e.clientY, e.clientX);
             });
             powerRail.addEventListener('pointermove', e => {
                 if (!powerDragging) return;
-                updatePowerFromClientY(e.clientY);
+                updatePowerFromClientY(e.clientY, e.clientX);
             });
             powerRail.addEventListener('pointerup', releasePower);
             powerRail.addEventListener('pointercancel', releasePower);
@@ -6167,8 +6240,8 @@
                 const cx = rect.left + rect.width / 2;
                 const cy = rect.top + rect.height / 2;
                 const r = rect.width * 0.41;
-                let dx = (clientX - cx) / r;
-                let dy = (cy - clientY) / r;
+                let dx = isForceLandscape() ? (clientY - cy) / r : (clientX - cx) / r;
+                let dy = isForceLandscape() ? (clientX - cx) / r : (cy - clientY) / r;
                 const len = Math.hypot(dx, dy);
                 if (len > 1) { dx /= len; dy /= len; }
                 // Enforce rail-bridge / côn băng lower-ball hit restriction!
