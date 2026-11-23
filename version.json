@@ -1,11 +1,11 @@
 {
-  "version": "2.1.1",
-  "versionCode": 22,
+  "version": "2.2.0",
+  "versionCode": 23,
   "releasedAt": "2026-11-23",
-  "title": "v2.1.1 — Tự Động Xoay Ngang & Khóa Màn Hình Ngang Trên Điện Thoại (Không Cần Cảm Biến Xoay)",
+  "title": "v2.2.0 — Góc Nhìn Tùy Chỉnh Chuẩn Virtual Pool 4, Đồ Họa Retina Sắc Nét & Nỉ Bàn Đầm Tay",
   "highlights": [
-    "Bộ phím tắt tối ưu cho Windows/PC: A/D hoặc ←/→ ngắm mượt (Shift ngắm siêu mịn Sniper, Scroll lăn chuột ngắm mịn), giữ Space kéo lực & thả để đánh (Esc hủy)",
-    "Phím nhanh cơ thủ Pro: 1/2/3/V/Tab chuyển góc máy, E mở bảng Áp-phê, Q reset tâm bi, B đổi Gậy Phá/Đánh, K chấm lơ, T gia hạn +15s, H xem bảng phím tắt",
-    "Đấu Trường Chung Kết 4 mặt khán đài 7 tầng, Côn Băng / Cò Tay 360Hz, Shop 14 Cơ 3D, 6 Boss AI BO5, Giải Đấu $960K & Quay Trailer 9:16 / 16:9"
+    "Góc nhìn tùy chỉnh tự do chuẩn Virtual Pool 4: vuốt lên/xuống (hoặc W/S) để nâng/hạ độ cao mắt ngắm từ sát mặt bàn tới nhìn chéo cao, chụm 2 ngón (hoặc Shift+W/S) để zoom gần/xa mà vẫn chỉnh gậy liên tục",
+    "Tăng độ sắc nét màn hình Retina (DPR lên tới 1.75x–2.25x) và kéo camera mặc định gần bàn hơn giúp bi & gậy to rõ, hết mờ",
+    "Tinh chỉnh nỉ bàn & băng cao su đầm tay hơn (giảm độ nảy băng & nảy mặt đá, bi lăn mượt chuẩn Simonis 860)"
   ]
 }

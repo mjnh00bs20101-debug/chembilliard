@@ -1289,14 +1289,14 @@
         const CUSHION_H = BALL_R * 0.27;    // Cushion nose height (63.5% of ball diameter)
 
         const GRAVITY = 9.81;
-        const MU_SLIDE = 0.20;              // Simonis 860 sliding cloth friction
-        const MU_ROLL = 0.0122;             // Pure rolling resistance (authentic tournament speed)
-        const MU_SPIN_Z = 0.042;            // Sidespin viscous decay on felt
-        const MU_CUSHION = 0.19;            // Artemis rubber + Simonis cloth cushion friction (English)
+        const MU_SLIDE = 0.21;              // Simonis 860 sliding cloth friction
+        const MU_ROLL = 0.0155;             // Authentic tournament cloth rolling resistance (less slick/runaway)
+        const MU_SPIN_Z = 0.048;            // Sidespin viscous decay on felt
+        const MU_CUSHION = 0.20;            // Artemis rubber + Simonis cloth cushion friction (English)
         const MU_BALL_BALL = 0.055;         // Base phenolic ball-ball friction (CIT/SIT Throw)
-        const E_BALL_BALL = 0.945;          // Aramith phenolic ball-ball restitution
-        const E_CUSHION = 0.79;             // Base Artemis cushion restitution
-        const E_SLATE = 0.52;               // Slate bounce restitution for jump shots
+        const E_BALL_BALL = 0.925;          // Aramith phenolic ball-ball restitution (crisp, natural)
+        const E_CUSHION = 0.72;             // Tighter pro cushion restitution (less bouncy/springy)
+        const E_SLATE = 0.36;               // Dampened slate felt restitution (no excessive ball hop)
 
         const CORNER_MOUTH = 0.098;         // Forgiving, fun & realistic 4.7-inch corner pocket mouth
         const SIDE_MOUTH = 0.072;           // Forgiving side pocket mouth
@@ -3504,9 +3504,9 @@
             state.gfxQuality = quality || state.gfxQuality;
             if (renderer) {
                 const dpr = window.devicePixelRatio || 1;
-                let maxDpr = 1.25;
-                if (state.gfxQuality === 'low') maxDpr = 1.0;
-                else if (state.gfxQuality === 'high') maxDpr = 1.75;
+                let maxDpr = 1.75;
+                if (state.gfxQuality === 'low') maxDpr = 1.15;
+                else if (state.gfxQuality === 'high') maxDpr = 2.25;
                 renderer.setPixelRatio(Math.min(dpr, maxDpr));
                 const vp = getViewportSize();
                 renderer.setSize(vp.w, vp.h);
@@ -5935,22 +5935,28 @@
                     cue.z * 0.45
                 );
             } else {
-                // ShootersPool Signature Low-Angle Broadcast View + subtle power-charge anticipation pullback!
+                // Virtual Pool 4 (VP4) Customizable Aiming Camera:
+                // Drag UP/DOWN adjusts elevation (low cue-level -> high angled view), Pinch / W-S / Ctrl+Scroll zooms closer/farther!
                 const _vpCam = getViewportSize();
                 const isPortrait = _vpCam.h > _vpCam.w;
-                const chargePull = (state.phase === 'aiming' ? state.cuePullVisual * 0.055 : 0);
-                const backDist = (isPortrait ? 0.90 : 0.70) + chargePull;
-                const camH = isPortrait ? 0.32 : 0.215;
+                if (state.aimCamPitch === undefined) state.aimCamPitch = 0.26;
+                if (state.aimCamDist === undefined) state.aimCamDist = isPortrait ? 0.74 : 0.58;
+                const chargePull = (state.phase === 'aiming' ? state.cuePullVisual * 0.05 : 0);
+                const dist = Math.max(0.36, Math.min(1.75, state.aimCamDist)) + chargePull;
+                const pitch = Math.max(0.08, Math.min(1.28, state.aimCamPitch));
                 const effElev = Math.max(state.elevation, state.visualElevDeg || 0);
+                const horizDist = Math.cos(pitch) * dist;
+                const camH = Math.max(0.11, Math.sin(pitch) * dist + 0.075 + (effElev / 65) * 0.14);
                 targetPos.set(
-                    cue.x - Math.cos(state.aimAngle) * backDist,
-                    camH + (effElev / 65) * 0.19,
-                    cue.z - Math.sin(state.aimAngle) * backDist
+                    cue.x - Math.cos(state.aimAngle) * horizDist,
+                    camH,
+                    cue.z - Math.sin(state.aimAngle) * horizDist
                 );
+                const lookAhead = Math.max(0.35, 1.05 * Math.cos(pitch * 0.75));
                 lookAtPos.set(
-                    cue.x + Math.cos(state.aimAngle) * 1.15,
+                    cue.x + Math.cos(state.aimAngle) * lookAhead,
                     0.032,
-                    cue.z + Math.sin(state.aimAngle) * 1.15
+                    cue.z + Math.sin(state.aimAngle) * lookAhead
                 );
             }
 
@@ -6049,10 +6055,15 @@
                         state.orbitPitch = Math.max(0.28, Math.min(1.2, Math.asin(Math.min(0.95, camera.position.y / state.orbitDist))));
                     }
                     state.orbitYaw += dx * 0.007;
-                    state.orbitPitch = Math.max(0.22, Math.min(1.45, state.orbitPitch + dy * 0.006));
+                    state.orbitPitch = Math.max(0.16, Math.min(1.45, state.orbitPitch + dy * 0.006));
                 } else if (state.phase === 'aiming' && canLocalPlayerAct()) {
                     const sensitivity = state.camMode === 'top' ? 0.0052 : 0.0038;
                     state.aimAngle += dx * sensitivity;
+                    // VP4-style free vertical camera elevation while aiming!
+                    if (state.camMode === 'low' && Math.abs(dy) > 0.3) {
+                        if (state.aimCamPitch === undefined) state.aimCamPitch = 0.26;
+                        state.aimCamPitch = Math.max(0.08, Math.min(1.28, state.aimCamPitch + dy * 0.0036));
+                    }
                 }
             };
 
@@ -6065,14 +6076,19 @@
             canvas.addEventListener('wheel', e => {
                 if (state.screen !== 'game') return;
                 if (state.camMode === 'orbit' || (state.phase === 'replaying' && state.replayCam === 'orbit')) {
-                    state.orbitDist = Math.max(1.15, Math.min(3.8, state.orbitDist + e.deltaY * 0.0018));
+                    state.orbitDist = Math.max(0.95, Math.min(3.8, state.orbitDist + e.deltaY * 0.0018));
                 } else if (state.phase === 'aiming' && canLocalPlayerAct()) {
-                    const step = e.shiftKey ? 0.0007 : 0.0024;
-                    state.aimAngle += (e.deltaY > 0 ? 1 : -1) * step;
+                    if (e.ctrlKey || e.altKey) {
+                        if (state.aimCamDist === undefined) state.aimCamDist = 0.58;
+                        state.aimCamDist = Math.max(0.36, Math.min(1.75, state.aimCamDist + e.deltaY * 0.0012));
+                    } else {
+                        const step = e.shiftKey ? 0.0007 : 0.0024;
+                        state.aimAngle += (e.deltaY > 0 ? 1 : -1) * step;
+                    }
                 }
             }, { passive: true });
 
-            // Mobile Touch Controls (1-finger aim/orbit/ball-in-hand, 2-finger pinch zoom)
+            // Mobile Touch Controls (1-finger aim + VP4 vertical pitch, 2-finger pinch zoom in BOTH aim & orbit!)
             canvas.addEventListener('touchstart', e => {
                 if (e.touches.length === 1) {
                     onPointerDown(e.touches[0].clientX, e.touches[0].clientY);
@@ -6088,14 +6104,19 @@
             canvas.addEventListener('touchmove', e => {
                 if (e.touches.length === 1) {
                     onPointerMove(e.touches[0].clientX, e.touches[0].clientY);
-                } else if (e.touches.length === 2 && state.camMode === 'orbit') {
+                } else if (e.touches.length === 2) {
                     const dist = Math.hypot(
                         e.touches[0].clientX - e.touches[1].clientX,
                         e.touches[0].clientY - e.touches[1].clientY
                     );
                     const delta = pinchStartDist - dist;
                     pinchStartDist = dist;
-                    state.orbitDist = Math.max(1.15, Math.min(3.8, state.orbitDist + delta * 0.005));
+                    if (state.camMode === 'orbit') {
+                        state.orbitDist = Math.max(0.95, Math.min(3.8, state.orbitDist + delta * 0.005));
+                    } else if (state.camMode === 'low') {
+                        if (state.aimCamDist === undefined) state.aimCamDist = 0.58;
+                        state.aimCamDist = Math.max(0.36, Math.min(1.75, state.aimCamDist + delta * 0.0032));
+                    }
                 }
             }, { passive: true });
 
@@ -8891,12 +8912,18 @@
                 return;
             }
 
-            // Orbit camera smooth keyboard navigation
+            // Orbit camera smooth keyboard navigation (still allows aiming cue with A/D while in aiming phase!)
             if (state.camMode === 'orbit') {
                 const rotSpd = pcKeys.Shift ? 0.55 : 1.45;
-                if (pcKeys.KeyA || pcKeys.ArrowLeft) state.orbitYaw -= rotSpd * dt;
-                if (pcKeys.KeyD || pcKeys.ArrowRight) state.orbitYaw += rotSpd * dt;
-                if (pcKeys.KeyW || pcKeys.ArrowUp) state.orbitDist = Math.max(1.15, state.orbitDist - 1.4 * dt);
+                if (state.phase === 'aiming' && canLocalPlayerAct()) {
+                    const aimSpd = pcKeys.Shift ? 0.14 : (pcKeys.Control ? 2.15 : 0.85);
+                    if (pcKeys.KeyA || pcKeys.ArrowLeft) state.aimAngle -= aimSpd * dt;
+                    if (pcKeys.KeyD || pcKeys.ArrowRight) state.aimAngle += aimSpd * dt;
+                } else {
+                    if (pcKeys.KeyA || pcKeys.ArrowLeft) state.orbitYaw -= rotSpd * dt;
+                    if (pcKeys.KeyD || pcKeys.ArrowRight) state.orbitYaw += rotSpd * dt;
+                }
+                if (pcKeys.KeyW || pcKeys.ArrowUp) state.orbitDist = Math.max(0.95, state.orbitDist - 1.4 * dt);
                 if (pcKeys.KeyS || pcKeys.ArrowDown) state.orbitDist = Math.min(3.8, state.orbitDist + 1.4 * dt);
             } else if (state.phase === 'aiming' && canLocalPlayerAct()) {
                 // Smooth 60FPS Aiming: A/D or Left/Right (Shift = Sniper 6x fine aim, Ctrl = Fast 2.5x)
@@ -8906,6 +8933,19 @@
                 if (aimDir !== 0) {
                     const spd = pcKeys.Shift ? 0.14 : (pcKeys.Control ? 2.15 : 0.85);
                     state.aimAngle += aimDir * spd * dt;
+                }
+                // VP4-style W/S or Up/Down zooms / tilts aiming camera cleanly
+                if (state.camMode === 'low') {
+                    if (state.aimCamPitch === undefined) state.aimCamPitch = 0.26;
+                    if (state.aimCamDist === undefined) state.aimCamDist = 0.58;
+                    if (pcKeys.KeyW || pcKeys.ArrowUp) {
+                        if (pcKeys.Shift) state.aimCamDist = Math.max(0.36, state.aimCamDist - 0.8 * dt);
+                        else state.aimCamPitch = Math.min(1.28, state.aimCamPitch + 0.9 * dt);
+                    }
+                    if (pcKeys.KeyS || pcKeys.ArrowDown) {
+                        if (pcKeys.Shift) state.aimCamDist = Math.min(1.75, state.aimCamDist + 0.8 * dt);
+                        else state.aimCamPitch = Math.max(0.08, state.aimCamPitch - 0.9 * dt);
+                    }
                 }
             }
 
@@ -9043,10 +9083,10 @@
         // 16. AUTO-UPDATE & VERSION CHANGELOG HUB (CHEMNOTE STYLE)
         // =========================================================================
         const APP_CURRENT_VERSION = {
-            version: '2.1.0',
-            versionCode: 21,
-            releasedAt: '2026-11-22',
-            title: 'ChemBilliard 3D Pro — Phím Tắt Windows/PC, Hub Cập Nhật & Trailer 9:16'
+            version: '2.2.0',
+            versionCode: 23,
+            releasedAt: '2026-11-23',
+            title: 'ChemBilliard 3D Pro — Camera Virtual Pool 4, Retina & Nỉ Đầm Tay'
         };
 
         const VERSION_CHANGELOG_HISTORY = [
