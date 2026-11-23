@@ -355,16 +355,22 @@
             </div>
         </div>
 
-        <!-- Ball-in-Hand Confirm Banner -->
+        <!-- Ball-in-Hand / Break Placement Confirm Banner -->
         <div id="bih-banner" class="hidden fixed top-20 left-1/2 -translate-x-1/2 z-30 pointer-events-auto flex flex-col items-center gap-2">
             <div class="glass-panel rounded-2xl px-4 py-2 text-center border-emerald-400/50">
-                <div class="text-xs sm:text-sm font-bold text-emerald-300">ĐẶT BI CÁI TỰ DO (BALL-IN-HAND)</div>
-                <div class="text-[11px] text-slate-300">Chạm & kéo bi cái trên bàn đến vị trí mong muốn</div>
+                <div id="bih-banner-title" class="text-xs sm:text-sm font-bold text-emerald-300">ĐẶT BI CÁI TỰ DO (BALL-IN-HAND)</div>
+                <div id="bih-banner-sub" class="text-[11px] text-slate-300">Chạm &amp; kéo bi cái trên bàn đến vị trí mong muốn</div>
             </div>
             <button id="btn-confirm-bih" class="px-5 py-2 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 font-extrabold text-xs sm:text-sm text-white shadow-lg active:scale-95 transition">
                 ✓ Xác nhận vị trí
             </button>
         </div>
+
+        <!-- Break Shot Custom Position Button (shows before breaking!) -->
+        <button id="btn-break-place" onclick="if (state.isBreakShot && state.phase === 'aiming' && canLocalPlayerAct()) enterBallInHand(true);" class="hidden fixed top-20 left-1/2 -translate-x-1/2 z-30 pointer-events-auto px-3.5 py-1.5 rounded-xl bg-amber-500/90 hover:bg-amber-400 border border-amber-200/70 text-[11px] font-black text-slate-950 shadow-lg active:scale-95 transition flex items-center gap-1.5" title="Di chuyển bi cái sau vạch đầu bàn để chọn góc phá bi (Phím G)">
+            <span>✋</span>
+            <span>Chỉnh chỗ phá bi</span>
+        </button>
 
         <!-- Practice Mode Quick Tools + Classic Pro Drills -->
         <div id="practice-tools" class="hidden fixed left-2.5 sm:left-4 top-1/2 -translate-y-1/2 z-20 pointer-events-auto flex flex-col gap-1.5">
@@ -5426,9 +5432,22 @@
             return true;
         }
 
-        function enterBallInHand() {
+        function enterBallInHand(kitchenOnly = false) {
             state.phase = 'ballInHand';
-            respawnCueBall();
+            state.bihKitchenOnly = !!kitchenOnly;
+            const cue = balls[0];
+            if (cue.pocketed || !kitchenOnly) {
+                respawnCueBall();
+            } else {
+                cue.x = Math.min(-HALF_W * 0.5, Math.max(-HALF_W + BALL_R + 0.004, cue.x));
+                cue.z = Math.max(-HALF_D + BALL_R + 0.004, Math.min(HALF_D - BALL_R - 0.004, cue.z));
+                cue.mesh.position.set(cue.x, BALL_R, cue.z);
+                cue.shadowMesh.position.set(cue.x, 0.0008, cue.z);
+            }
+            const tEl = document.getElementById('bih-banner-title');
+            const sEl = document.getElementById('bih-banner-sub');
+            if (tEl) tEl.textContent = kitchenOnly ? '🎯 CHỌN VỊ TRÍ PHÁ BI (SAU VẠCH ĐẦU BÀN)' : 'ĐẶT BI CÁI TỰ DO (BALL-IN-HAND)';
+            if (sEl) sEl.textContent = kitchenOnly ? 'Kéo bi cái trong vùng đầu bàn (giữa hoặc sát băng) rồi bấm Xác nhận' : 'Chạm & kéo bi cái trên bàn đến vị trí mong muốn';
             document.getElementById('bih-banner').classList.remove('hidden');
             bihRingMesh.visible = true;
             updateHUD();
@@ -5440,9 +5459,15 @@
                 showToast('Vị trí bị trùng bi khác! Hãy kéo ra chỗ trống.', 'error');
                 return;
             }
+            const wasBreakPlace = !!state.bihKitchenOnly;
+            state.bihKitchenOnly = false;
             document.getElementById('bih-banner').classList.add('hidden');
             bihRingMesh.visible = false;
             state.phase = 'aiming';
+            if (wasBreakPlace) {
+                // Auto-aim cleanly toward the head ball of the rack from the new break spot!
+                state.aimAngle = Math.atan2(0 - cue.z, (HALF_W * 0.5) - cue.x);
+            }
             updateHUD();
         }
 
@@ -6017,7 +6042,8 @@
                 const hit = new THREE.Vector3();
                 if (raycaster.ray.intersectPlane(tablePlane, hit)) {
                     const cue = balls[0];
-                    cue.x = Math.max(-HALF_W + BALL_R + 0.004, Math.min(HALF_W - BALL_R - 0.004, hit.x));
+                    const maxX = state.bihKitchenOnly ? (-HALF_W * 0.5) : (HALF_W - BALL_R - 0.004);
+                    cue.x = Math.max(-HALF_W + BALL_R + 0.004, Math.min(maxX, hit.x));
                     cue.z = Math.max(-HALF_D + BALL_R + 0.004, Math.min(HALF_D - BALL_R - 0.004, hit.z));
                     cue.mesh.position.set(cue.x, BALL_R, cue.z);
                     cue.shadowMesh.position.set(cue.x, 0.0008, cue.z);
@@ -6957,6 +6983,10 @@
             const showPush = state.canPushOut && isMyTurn && state.phase === 'aiming' && state.rules === '9ball';
             const pushBtn = document.getElementById('btn-push-out');
             if (pushBtn) pushBtn.classList.toggle('hidden', !showPush);
+
+            const showBreakPlace = state.isBreakShot && isMyTurn && state.phase === 'aiming';
+            const breakPlaceBtn = document.getElementById('btn-break-place');
+            if (breakPlaceBtn) breakPlaceBtn.classList.toggle('hidden', !showBreakPlace);
 
             const turnText = state.playType === 'practice'
                 ? 'Tập luyện'
@@ -8904,7 +8934,8 @@
                 if (pcKeys.KeyS || pcKeys.ArrowDown) mz += 1;
                 if (mx !== 0 || mz !== 0) {
                     const cue = balls[0];
-                    cue.x = Math.max(-HALF_W + BALL_R + 0.004, Math.min(HALF_W - BALL_R - 0.004, cue.x + mx * moveSpd * dt));
+                    const maxX = state.bihKitchenOnly ? (-HALF_W * 0.5) : (HALF_W - BALL_R - 0.004);
+                    cue.x = Math.max(-HALF_W + BALL_R + 0.004, Math.min(maxX, cue.x + mx * moveSpd * dt));
                     cue.z = Math.max(-HALF_D + BALL_R + 0.004, Math.min(HALF_D - BALL_R - 0.004, cue.z + mz * moveSpd * dt));
                     cue.mesh.position.set(cue.x, BALL_R, cue.z);
                     cue.shadowMesh.position.set(cue.x, 0.0008, cue.z);
@@ -9052,7 +9083,10 @@
                 else if (e.code === 'KeyL') { document.getElementById('btn-aim-toggle')?.click(); }
                 else if (e.code === 'KeyM') { document.getElementById('btn-sound')?.click(); }
                 else if (e.code === 'KeyF' && state.playType === 'practice') { document.getElementById('btn-practice-rerack')?.click(); }
-                else if (e.code === 'KeyG' && state.playType === 'practice') { document.getElementById('btn-practice-bih')?.click(); }
+                else if (e.code === 'KeyG') {
+                    if (state.isBreakShot && state.phase === 'aiming' && canLocalPlayerAct()) enterBallInHand(true);
+                    else if (state.playType === 'practice') document.getElementById('btn-practice-bih')?.click();
+                }
             });
 
             window.addEventListener('keyup', (e) => {
@@ -9083,10 +9117,10 @@
         // 16. AUTO-UPDATE & VERSION CHANGELOG HUB (CHEMNOTE STYLE)
         // =========================================================================
         const APP_CURRENT_VERSION = {
-            version: '2.2.0',
-            versionCode: 23,
+            version: '2.2.1',
+            versionCode: 24,
             releasedAt: '2026-11-23',
-            title: 'ChemBilliard 3D Pro — Camera Virtual Pool 4, Retina & Nỉ Đầm Tay'
+            title: 'ChemBilliard 3D Pro — Tùy Chỉnh Chỗ Phá Bi, Camera VP4 & Nỉ Đầm Tay'
         };
 
         const VERSION_CHANGELOG_HISTORY = [

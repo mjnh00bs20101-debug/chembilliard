@@ -1,11 +1,11 @@
 {
-  "version": "2.2.0",
-  "versionCode": 23,
+  "version": "2.2.1",
+  "versionCode": 24,
   "releasedAt": "2026-11-23",
-  "title": "v2.2.0 — Góc Nhìn Tùy Chỉnh Chuẩn Virtual Pool 4, Đồ Họa Retina Sắc Nét & Nỉ Bàn Đầm Tay",
+  "title": "v2.2.1 — Tùy Chỉnh Vị Trí Phá Bi Sau Vạch Đầu Bàn, Camera VP4 & Nỉ Đầm Tay",
   "highlights": [
-    "Góc nhìn tùy chỉnh tự do chuẩn Virtual Pool 4: vuốt lên/xuống (hoặc W/S) để nâng/hạ độ cao mắt ngắm từ sát mặt bàn tới nhìn chéo cao, chụm 2 ngón (hoặc Shift+W/S) để zoom gần/xa mà vẫn chỉnh gậy liên tục",
-    "Tăng độ sắc nét màn hình Retina (DPR lên tới 1.75x–2.25x) và kéo camera mặc định gần bàn hơn giúp bi & gậy to rõ, hết mờ",
-    "Tinh chỉnh nỉ bàn & băng cao su đầm tay hơn (giảm độ nảy băng & nảy mặt đá, bi lăn mượt chuẩn Simonis 860)"
+    "Thêm nút ✋ Chỉnh chỗ phá bi (phím G) trước cú đề-pa: di chuyển bi cái tự do trong vùng sau vạch đầu bàn (phá giữa, phá 1 nút hay phá sát băng chuẩn 9-Ball) rồi tự căn hướng thẳng vào bi đầu",
+    "Góc nhìn tùy chỉnh chuẩn Virtual Pool 4 (vuốt lên/xuống đổi độ cao mắt, chụm 2 ngón zoom gần/xa) & tăng độ nét Retina 1.75x–2.25x",
+    "Tinh chỉnh nỉ bàn & băng cao su đầm tay hơn (giảm nảy băng & nảy mặt đá)"
   ]
 }
